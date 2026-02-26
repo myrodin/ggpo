@@ -442,7 +442,10 @@ UdpProtocol::LogMsg(const char *prefix, UdpMsg *msg)
       Log("%s input ack.\n", prefix);
       break;
    default:
-      ASSERT(FALSE && "Unknown UdpMsg type.");
+      // @Custom for ProjectA - Log instead of crash on unknown msg type ~Start
+      Log("%s unknown msg type %d.\n", prefix, msg->hdr.type);
+      break;
+      // @Custom for ProjectA - Log instead of crash on unknown msg type ~End
    }
 }
 

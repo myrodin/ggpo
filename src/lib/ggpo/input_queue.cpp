@@ -65,9 +65,31 @@ InputQueue::DiscardConfirmedFrames(int frame)
 
    if (_last_frame_requested != GameInput::NullFrame) {
       frame = MIN(frame, _last_frame_requested);
+   } else {
+      // @Custom for ProjectA - Skip discard after ResetPrediction ~Start
+      return;
+      // @Custom for ProjectA - Skip discard after ResetPrediction ~End
    }
 
-   Log("discarding confirmed frames up to %d (last_added:%d length:%d [head:%d tail:%d]).\n", 
+   // @Custom for ProjectA - Conservative discard for rollback safety ~Start
+   // Keep at least MAX_PREDICTION_FRAMES (8) frames before _last_frame_requested.
+   // This ensures AdjustSimulation can always find inputs needed for rollback,
+   // even when _first_incorrect_frame is set after DiscardConfirmedFrames runs.
+   {
+      int safe_limit = _last_frame_requested - 8;
+      if (safe_limit >= 0) {
+         frame = MIN(frame, safe_limit);
+      }
+   }
+   // @Custom for ProjectA - Conservative discard for rollback safety ~End
+
+   // @Custom for ProjectA - Already discarded past this point ~Start
+   if (frame < _inputs[_tail].frame) {
+      return;
+   }
+   // @Custom for ProjectA - Already discarded past this point ~End
+
+   Log("discarding confirmed frames up to %d (last_added:%d length:%d [head:%d tail:%d]).\n",
        frame, _last_added_frame, _length, _head, _tail);
    if (frame >= _last_added_frame) {
       _tail = _head;
