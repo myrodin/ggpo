@@ -64,6 +64,22 @@ Udp::Init(uint16 port, Poll *poll, Callbacks *callbacks)
 }
 
 void
+Udp::Init(SOCKET existing_socket, Poll *poll, Callbacks *callbacks)
+{
+   _callbacks = callbacks;
+
+   _poll = poll;
+   _poll->RegisterLoop(this);
+
+   // ensure non-blocking I/O
+   u_long iMode = 1;
+   ioctlsocket(existing_socket, FIONBIO, &iMode);
+
+   _socket = existing_socket;
+   Log("using existing socket (handle=%llu).\n", (unsigned long long)existing_socket);
+}
+
+void
 Udp::SendTo(char *buffer, int len, int flags, struct sockaddr *dst, int destlen)
 {
    struct sockaddr_in *to = (struct sockaddr_in *)dst;

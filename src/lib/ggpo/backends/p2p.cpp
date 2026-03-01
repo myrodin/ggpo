@@ -54,7 +54,42 @@ Peer2PeerBackend::Peer2PeerBackend(GGPOSessionCallbacks *cb,
     */
    _callbacks.begin_game(gamename);
 }
-  
+
+Peer2PeerBackend::Peer2PeerBackend(GGPOSessionCallbacks *cb,
+                                   const char *gamename,
+                                   SOCKET existing_socket,
+                                   int num_players,
+                                   int input_size) :
+    _num_players(num_players),
+    _input_size(input_size),
+    _sync(_local_connect_status),
+    _disconnect_timeout(DEFAULT_DISCONNECT_TIMEOUT),
+    _disconnect_notify_start(DEFAULT_DISCONNECT_NOTIFY_START),
+    _num_spectators(0),
+    _next_spectator_frame(0)
+{
+   _callbacks = *cb;
+   _synchronizing = true;
+   _next_recommended_sleep = 0;
+
+   Sync::Config config = { 0 };
+   config.num_players = num_players;
+   config.input_size = input_size;
+   config.callbacks = _callbacks;
+   config.num_prediction_frames = MAX_PREDICTION_FRAMES;
+   _sync.Init(config);
+
+   _udp.Init(existing_socket, &_poll, this);
+
+   _endpoints = new UdpProtocol[_num_players];
+   memset(_local_connect_status, 0, sizeof(_local_connect_status));
+   for (int i = 0; i < ARRAY_SIZE(_local_connect_status); i++) {
+      _local_connect_status[i].last_frame = -1;
+   }
+
+   _callbacks.begin_game(gamename);
+}
+
 Peer2PeerBackend::~Peer2PeerBackend()
 {
    delete [] _endpoints;

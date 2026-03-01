@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include <stdarg.h>
+#include <stdint.h>
 
 // On windows, export at build time and import at runtime.
 // ELF systems don't need an explicit export/import.
@@ -325,6 +326,13 @@ GGPO_API GGPOErrorCode __cdecl ggpo_start_session(GGPOSession **session,
                                                   int num_players,
                                                   int input_size,
                                                   unsigned short localport);
+
+GGPO_API GGPOErrorCode __cdecl ggpo_start_session_with_socket(GGPOSession **session,
+                                                              GGPOSessionCallbacks *cb,
+                                                              const char *game,
+                                                              int num_players,
+                                                              int input_size,
+                                                              uint64_t existing_socket);
 
 
 /*

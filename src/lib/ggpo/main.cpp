@@ -52,6 +52,22 @@ ggpo_start_session(GGPOSession **session,
 }
 
 GGPOErrorCode
+ggpo_start_session_with_socket(GGPOSession **session,
+                               GGPOSessionCallbacks *cb,
+                               const char *game,
+                               int num_players,
+                               int input_size,
+                               uint64_t existing_socket)
+{
+   *session = (GGPOSession *)new Peer2PeerBackend(cb,
+                                                  game,
+                                                  (SOCKET)existing_socket,
+                                                  num_players,
+                                                  input_size);
+   return GGPO_OK;
+}
+
+GGPOErrorCode
 ggpo_add_player(GGPOSession *ggpo,
                 GGPOPlayer *player,
                 GGPOPlayerHandle *handle)
